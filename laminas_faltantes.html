@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Láminas Faltantes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;padding-bottom:30px}
+
+header{background:#fff;border-bottom:1px solid #e0e0d8;padding:14px 16px;position:sticky;top:0;z-index:10}
+header h1{font-size:17px;font-weight:600;margin-bottom:10px}
+.search-row{display:flex;gap:8px}
+.search-row input{flex:1;font-size:16px;padding:9px 12px;border:1px solid #d0d0c8;border-radius:10px;background:#f9f9f6;outline:none}
+.search-row input:focus{border-color:#888;background:#fff}
+.clear-btn{padding:9px 14px;border:1px solid #d0d0c8;border-radius:10px;background:#f0f0ea;font-size:14px;cursor:pointer;color:#555}
+
+.filters{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 0;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{flex-shrink:0;font-size:13px;padding:5px 13px;border-radius:20px;border:1px solid #ccc;background:#fff;color:#555;cursor:pointer}
+.filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+
+.view-toggle{display:flex;gap:6px;padding:10px 16px 0;align-items:center;flex-wrap:wrap}
+.view-toggle span{font-size:12px;color:#888}
+.tog-btn{font-size:12px;padding:5px 13px;border-radius:20px;border:1px solid #ccc;background:#fff;color:#555;cursor:pointer}
+.tog-btn.active{background:#2d6ed4;color:#fff;border-color:#2d6ed4}
+
+.match-banner{background:#2d6ed4;color:#fff;text-align:center;padding:8px;font-size:14px;font-weight:500;display:none}
+
+.totals{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+.totals::-webkit-scrollbar{display:none}
+.tot{flex-shrink:0;background:#fff;border:1px solid #e0e0d8;border-radius:10px;padding:8px 14px;text-align:center;min-width:72px}
+.tot-label{font-size:10px;color:#888;margin-bottom:1px}
+.tot-num{font-size:20px;font-weight:700}
+.tot.grand{background:#1a1a1a;color:#fff}
+.tot.grand .tot-label{color:#aaa}
+.tot.got-tot{background:#e8f5e9;border-color:#a5d6a7}
+.tot.got-tot .tot-label{color:#388e3c}
+.tot.got-tot .tot-num{color:#2e7d32}
+
+.info-bar{font-size:12px;color:#888;padding:6px 16px 2px;display:flex;justify-content:space-between;align-items:center}
+.reset-btn{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #ffb3b3;background:#fff5f5;color:#c62828;cursor:pointer}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;padding:8px 16px 24px}
+
+.card{background:#fff;border:1px solid #e0e0d8;border-radius:12px;padding:12px}
+.card.highlight{border-color:#2d6ed4;background:#edf4fd}
+.card.complete{border-color:#66bb6a;background:#f1f8f1}
+.card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.flag{font-size:22px}
+.meta{flex:1;min-width:0}
+.code{font-size:14px;font-weight:600}
+.country{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-badge{font-size:10px;padding:2px 6px;border-radius:8px;background:#f0f0ea;color:#888;flex-shrink:0}
+.count-row{display:flex;align-items:baseline;gap:6px;margin-bottom:5px}
+.count-big{font-size:26px;font-weight:700}
+.count-found{font-size:12px;color:#43a047;font-weight:500}
+.progress-bar{height:5px;background:#e0e0d8;border-radius:4px;margin-bottom:8px;overflow:hidden}
+.progress-fill{height:100%;background:#43a047;border-radius:4px;transition:width .3s}
+.nums{display:flex;flex-wrap:wrap;gap:4px}
+.num-pill{font-size:13px;padding:5px 9px;border-radius:7px;background:#f0f0ea;color:#555;cursor:pointer;user-select:none;transition:all .12s;border:1.5px solid transparent;-webkit-tap-highlight-color:transparent}
+.num-pill.match{background:#2d6ed4;color:#fff;font-weight:600;border-color:#2d6ed4}
+.num-pill.got{background:#e8f5e9;color:#2e7d32;text-decoration:line-through;border-color:#a5d6a7}
+.num-pill.got.match{background:#43a047;color:#fff;border-color:#43a047}
+
+.empty{text-align:center;padding:3rem 1rem;color:#aaa;font-size:15px;grid-column:1/-1}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:100;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Láminas Faltantes</h1>
+  <div class="search-row">
+    <input type="number" id="numInput" placeholder="Busca número de lámina (ej: 7)" min="1" max="20" oninput="render()" inputmode="numeric">
+    <button class="clear-btn" onclick="clearSearch()">✕</button>
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<div class="view-toggle">
+  <span>Mostrar:</span>
+  <button class="tog-btn active" id="togAll" onclick="setView('all')">Todos</button>
+  <button class="tog-btn" id="togMissing" onclick="setView('missing')">Faltan</button>
+  <button class="tog-btn" id="togFound" onclick="setView('found')">Completos</button>
+</div>
+
+<div class="match-banner" id="matchBanner"></div>
+<div class="totals" id="totals"></div>
+<div class="info-bar">
+  <span id="info"></span>
+  <button class="reset-btn" onclick="resetAll()">Reiniciar todo</button>
+</div>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAMS=[
+  {code:'FWC',name:'FIFA World Cup',flag:'🏆',sheet:1,missing:[2,3,4,5,6,7,11,12,17,18,19]},
+  {code:'MEX',name:'México',flag:'🇲🇽',sheet:1,missing:[1,3,4,7,8,10,11,12,13,16,19]},
+  {code:'RSA',name:'Sudáfrica',flag:'🇿🇦',sheet:1,missing:[1,3,7,10,11,13,16,17,18,20]},
+  {code:'KOR',name:'Corea del Sur',flag:'🇰🇷',sheet:1,missing:[1,2,5,6,9,10,13,14,15,17,18,19]},
+  {code:'CZE',name:'Rep. Checa',flag:'🇨🇿',sheet:1,missing:[3,4,12,13,14,16,17,18,20]},
+  {code:'CAN',name:'Canadá',flag:'🇨🇦',sheet:1,missing:[3,5,6,8,10,11,12,13,16,17,20]},
+  {code:'BIH',name:'Bosnia y Herz.',flag:'🇧🇦',sheet:1,missing:[5,8,20]},
+  {code:'QAT',name:'Qatar',flag:'🇶🇦',sheet:1,missing:[1,2,3,5,6,7,9,10,11,12,13,14,16,17,18,19,20]},
+  {code:'SUI',name:'Suiza',flag:'🇨🇭',sheet:1,missing:[1,2,3,4,5,6,7,8,11,13,14]},
+  {code:'BRA',name:'Brasil',flag:'🇧🇷',sheet:1,missing:[1,4,5,7,8,9,11,14,15,17,18,19]},
+  {code:'MAR',name:'Marruecos',flag:'🇲🇦',sheet:1,missing:[1,2,3,4,5,6,7,9,10,12,14,15,16,17,18]},
+  {code:'HAI',name:'Haití',flag:'🇭🇹',sheet:2,missing:[5,7,8,9,10,11,15,17,18,19]},
+  {code:'SCO',name:'Escocia',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',sheet:2,missing:[1,3,4,5,6,12,14,15,18,19]},
+  {code:'USA',name:'Estados Unidos',flag:'🇺🇸',sheet:2,missing:[2,3,4,6,7,10,11,13,14,16]},
+  {code:'PAR',name:'Paraguay',flag:'🇵🇾',sheet:2,missing:[1,2,4,7,9,11,12,14,15,16,18,19,20]},
+  {code:'AUS',name:'Australia',flag:'🇦🇺',sheet:2,missing:[2,3,5,7,8,9,10,11,13,14,16,17,18,20]},
+  {code:'TUR',name:'Turquía',flag:'🇹🇷',sheet:2,missing:[1,3,5,6,7,9,10,11,12,13,14,15,16,17,18]},
+  {code:'GER',name:'Alemania',flag:'🇩🇪',sheet:2,missing:[3,5,14,16,18]},
+  {code:'CUW',name:'Curazao',flag:'🇨🇼',sheet:2,missing:[1,3,4,5,7,9,13,14,18,19]},
+  {code:'CIV',name:'Costa de Marfil',flag:'🇨🇮',sheet:2,missing:[4,5,6,8,9,10,11,12,14,18,19,20]},
+  {code:'ECU',name:'Ecuador',flag:'🇪🇨',sheet:2,missing:[1,3,4,5,7,9,10,11,14,15,16,18,19,20]},
+  {code:'NED',name:'Países Bajos',flag:'🇳🇱',sheet:2,missing:[1,3,5,6,10,15,17,18,20]},
+  {code:'JPN',name:'Japón',flag:'🇯🇵',sheet:2,missing:[1,2,3,5,7,8,9,11,12,14,15,16,17,18,19,20]},
+  {code:'PAN',name:'Panamá',flag:'🇵🇦',sheet:3,missing:[2,3,4,5,6,7,9,10,11,14,16,17,18,19,20]},
+  {code:'SEN',name:'Senegal',flag:'🇸🇳',sheet:3,missing:[2,3,5,7,8,11,12,13,14,15,16,17,18,19,20]},
+  {code:'IRQ',name:'Irak',flag:'🇮🇶',sheet:3,missing:[2,3,5,6,7,9,10,11,14,16,18,20]},
+  {code:'NOR',name:'Noruega',flag:'🇳🇴',sheet:3,missing:[1,2,3,5,6,7,8,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ARG',name:'Argentina',flag:'🇦🇷',sheet:3,missing:[1,2,3,5,6,7,8,10,11,15]},
+  {code:'ALG',name:'Argelia',flag:'🇩🇿',sheet:3,missing:[1,3,7,8,9,10,11,12,13,15,16,17,19,20]},
+  {code:'AUT',name:'Austria',flag:'🇦🇹',sheet:3,missing:[1,2,3,4,5,7,9,13,14,16,18,19,20]},
+  {code:'JOR',name:'Jordania',flag:'🇯🇴',sheet:3,missing:[1,3,4,5,6,7,8,11,14,16,18,19,20]},
+  {code:'POR',name:'Portugal',flag:'🇵🇹',sheet:3,missing:[3,4,5,8,11,12,16,18,20]},
+  {code:'COD',name:'Congo RD',flag:'🇨🇩',sheet:3,missing:[1,3,5,7,10,11,14,15,16,19,20]},
+  {code:'UZB',name:'Uzbekistán',flag:'🇺🇿',sheet:3,missing:[1,6,7,9,10,11,13,14,15,16,19,20]},
+  {code:'COL',name:'Colombia',flag:'🇨🇴',sheet:3,missing:[1,3,4,5,7,8,9,10,11,16,17,18]},
+  {code:'ENG',name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',sheet:3,missing:[1,2,3,4,5,6,7,8,9,10,11,14,15,16,20]},
+  {code:'GHA',name:'Ghana',flag:'🇬🇭',sheet:4,missing:[3,6,7,9,10,11,14,15,16,18,19]},
+  {code:'SWE',name:'Suecia',flag:'🇸🇪',sheet:4,missing:[1,3,5,11,15,16,17,19,20]},
+  {code:'TUN',name:'Túnez',flag:'🇹🇳',sheet:4,missing:[3,7,10,11,14,17,18,19,20]},
+  {code:'BEL',name:'Bélgica',flag:'🇧🇪',sheet:4,missing:[1,3,4,6,7,8,9,10,11,12,14,15,16,17,18,19,20]},
+  {code:'EGY',name:'Egipto',flag:'🇪🇬',sheet:4,missing:[1,2,3,5,7,8,9,11,12,14,15,16,17,18,20]},
+  {code:'IRN',name:'Irán',flag:'🇮🇷',sheet:4,missing:[1,2,6,7,9,10,11,15,16,19,20]},
+  {code:'NZL',name:'Nueva Zelanda',flag:'🇳🇿',sheet:4,missing:[3,4,5,6,8,9,13,14,15,18,19]},
+  {code:'ESP',name:'España',flag:'🇪🇸',sheet:4,missing:[2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,20]},
+  {code:'CPV',name:'Cabo Verde',flag:'🇨🇻',sheet:4,missing:[2,3,5,6,7,9,11,12,13,14,15,16,18]},
+  {code:'KSA',name:'Arabia Saudita',flag:'🇸🇦',sheet:4,missing:[1,2,3,4,6,7,8,10,11,14,15,16,17,18,19,20]},
+  {code:'URU',name:'Uruguay',flag:'🇺🇾',sheet:4,missing:[1,3,5,6,7,8,9,12,14,16,17,18]},
+  {code:'FRA',name:'Francia',flag:'🇫🇷',sheet:4,missing:[2,3,5,6,7,9,10,11,14,16,18,19,20]},
+  {code:'CRO',name:'Croacia',flag:'🇭🇷',sheet:4,missing:[1,2,3,4,5,7,8,11,15,16,17,18,19,20]},
+];
+
+function loadState(){try{return JSON.parse(localStorage.getItem('laminas_got')||'{}')}catch(e){return{}}}
+function saveState(s){localStorage.setItem('laminas_got',JSON.stringify(s))}
+let GOT=loadState();
+function isGot(code,num){return!!GOT[code+'_'+num]}
+function toggleGot(code,num){const k=code+'_'+num;if(GOT[k])delete GOT[k];else GOT[k]=true;saveState(GOT)}
+
+let activeSheet=0,viewMode='all';
+
+const filterDiv=document.getElementById('filters');
+['Todas','Hoja 1','Hoja 2','Hoja 3','Hoja 4'].forEach((label,i)=>{
+  const btn=document.createElement('button');
+  btn.className='filter-btn'+(i===0?' active':'');
+  btn.textContent=label;
+  btn.onclick=()=>{activeSheet=i;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render()};
+  filterDiv.appendChild(btn);
+});
+
+function setView(v){
+  viewMode=v;
+  ['All','Missing','Found'].forEach(x=>document.getElementById('tog'+x).classList.remove('active'));
+  document.getElementById('tog'+v.charAt(0).toUpperCase()+v.slice(1)).classList.add('active');
+  render();
+}
+
+function clearSearch(){document.getElementById('numInput').value='';render()}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+function resetAll(){
+  if(confirm('¿Reiniciar todo? Se perderán las láminas marcadas.')){
+    GOT={};saveState(GOT);render();showToast('Reiniciado ✓');
+  }
+}
+
+function renderTotals(){
+  const div=document.getElementById('totals');div.innerHTML='';
+  let gMissing=0,gFound=0;
+  for(let s=1;s<=4;s++){
+    const teams=TEAMS.filter(t=>t.sheet===s);
+    const total=teams.reduce((a,t)=>a+t.missing.length,0);
+    const found=teams.reduce((a,t)=>a+t.missing.filter(n=>isGot(t.code,n)).length,0);
+    const still=total-found;
+    gMissing+=still;gFound+=found;
+    const d=document.createElement('div');d.className='tot';
+    d.innerHTML=`<div class="tot-label">Hoja ${s}</div><div class="tot-num">${still}</div>`;
+    div.appendChild(d);
+  }
+  const gf=document.createElement('div');gf.className='tot got-tot';
+  gf.innerHTML=`<div class="tot-label">✓ Conseguidas</div><div class="tot-num">${gFound}</div>`;
+  div.appendChild(gf);
+  const gd=document.createElement('div');gd.className='tot grand';
+  gd.innerHTML=`<div class="tot-label">Aún faltan</div><div class="tot-num">${gMissing}</div>`;
+  div.appendChild(gd);
+}
+
+function render(){
+  renderTotals();
+  const q=(document.getElementById('numInput').value||'').trim();
+  const num=parseInt(q);
+  const hasNum=q!==''&&!isNaN(num)&&num>=1&&num<=20;
+
+  let data=activeSheet===0?TEAMS:TEAMS.filter(t=>t.sheet===activeSheet);
+  if(hasNum) data=data.filter(t=>t.missing.includes(num));
+  if(viewMode==='missing') data=data.filter(t=>t.missing.some(n=>!isGot(t.code,n)));
+  if(viewMode==='found') data=data.filter(t=>t.missing.every(n=>isGot(t.code,n)));
+
+  const banner=document.getElementById('matchBanner');
+  if(hasNum){
+    banner.style.display='block';
+    banner.textContent=`${data.length} equipo${data.length!==1?'s':''} necesita${data.length===1?'':'n'} la lámina ${num}`;
+  } else banner.style.display='none';
+
+  document.getElementById('info').textContent=`Mostrando ${data.length} equipo${data.length!==1?'s':''}`;
+
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  if(!data.length){grid.innerHTML='<div class="empty">No hay equipos en esta vista</div>';return}
+
+  data.forEach(t=>{
+    const foundCount=t.missing.filter(n=>isGot(t.code,n)).length;
+    const still=t.missing.length-foundCount;
+    const pct=Math.round(foundCount/t.missing.length*100);
+    const complete=still===0;
+
+    const d=document.createElement('div');
+    d.className='card'+(complete?' complete':hasNum?' highlight':'');
+
+    const pills=t.missing.map(n=>{
+      let cls='num-pill';
+      if(isGot(t.code,n)) cls+=' got';
+      if(hasNum&&n===num) cls+=' match';
+      return `<span class="${cls}" onclick="tap('${t.code}',${n})">${n}</span>`;
+    }).join('');
+
+    d.innerHTML=`
+      <div class="card-top">
+        <span class="flag">${t.flag}</span>
+        <div class="meta"><div class="code">${t.code}</div><div class="country">${t.name}</div></div>
+        <span class="sheet-badge">H${t.sheet}</span>
+      </div>
+      <div class="count-row">
+        <span class="count-big">${still}</span>
+        ${foundCount>0?`<span class="count-found">✓ ${foundCount}</span>`:''}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="nums">${pills}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+function tap(code,num){
+  toggleGot(code,num);
+  showToast(isGot(code,num)?`✓ ${code} #${num} conseguida`:`${code} #${num} desmarcada`);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
