@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum FIFA World Cup 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+
+header { background: #fff; border-bottom: 1px solid #e0e0d8; padding: 14px 16px; position: sticky; top: 0; z-index: 10; }
+header h1 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.search-row { display: flex; gap: 8px; }
+.search-row input { flex: 1; font-size: 16px; padding: 9px 12px; border: 1px solid #d0d0c8; border-radius: 10px; background: #f9f9f6; outline: none; }
+.search-row input:focus { border-color: #888; background: #fff; }
+.clear-btn { padding: 9px 14px; border: 1px solid #d0d0c8; border-radius: 10px; background: #f0f0ea; font-size: 14px; cursor: pointer; color: #555; }
+
+.filters { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 0; scrollbar-width: none; }
+.filters::-webkit-scrollbar { display: none; }
+.fbtn { flex-shrink: 0; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid #ccc; background: #fff; color: #555; cursor: pointer; }
+.fbtn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+.vfilters { display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px 0; scrollbar-width: none; }
+.vfilters::-webkit-scrollbar { display: none; }
+.vbtn { flex-shrink: 0; font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 1px solid #ccc; background: #fff; color: #555; cursor: pointer; }
+.vbtn.active { background: #2a7a2a; color: #fff; border-color: #2a7a2a; }
+
+.banner { background: #3b7fd4; color: #fff; text-align: center; padding: 8px; font-size: 14px; font-weight: 500; display: none; }
+
+.totals { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; scrollbar-width: none; }
+.totals::-webkit-scrollbar { display: none; }
+.tot { flex-shrink: 0; background: #fff; border: 1px solid #e0e0d8; border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 70px; }
+.tot .tl { font-size: 10px; color: #888; margin-bottom: 2px; }
+.tot .tn { font-size: 19px; font-weight: 700; }
+.tot .ts { font-size: 10px; color: #aaa; margin-top: 1px; }
+.tot.grand { background: #1a1a1a; color: #fff; }
+.tot.grand .tl { color: #aaa; }
+.tot.grand .ts { color: #666; }
+.tot.tgot { background: #2a7a2a; color: #fff; }
+.tot.tgot .tl { color: #9fdf9f; }
+
+.infobar { font-size: 12px; color: #888; padding: 4px 16px; display: flex; justify-content: space-between; align-items: center; }
+.rbtn { font-size: 11px; color: #c0392b; background: none; border: none; cursor: pointer; }
+
+.legend { display: flex; gap: 12px; padding: 6px 16px 2px; flex-wrap: wrap; }
+.li { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #888; }
+.ld { width: 12px; height: 12px; border-radius: 3px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; padding: 8px 16px 32px; }
+
+.card { background: #fff; border: 1px solid #e0e0d8; border-radius: 12px; padding: 12px; }
+.card.hl { border-color: #3b7fd4; background: #edf4fd; }
+.card.done { border-color: #2a7a2a; background: #f0fbf0; opacity: 0.75; }
+
+.ctop { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.fl { font-size: 22px; line-height: 1; }
+.cm { flex: 1; min-width: 0; }
+.ccode { font-size: 14px; font-weight: 700; }
+.cname { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cbadges { display: flex; gap: 3px; margin-top: 3px; flex-wrap: wrap; }
+.gbadge { font-size: 10px; padding: 1px 6px; border-radius: 6px; color: #fff; font-weight: 600; }
+.pbadge { font-size: 10px; padding: 1px 6px; border-radius: 6px; background: #e8e8e0; color: #666; }
+
+.crow { display: flex; align-items: baseline; gap: 6px; margin-bottom: 5px; }
+.cbig { font-size: 26px; font-weight: 700; }
+.cgot { font-size: 13px; color: #2a7a2a; font-weight: 500; }
+
+.pbar { height: 4px; background: #e0e0d8; border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+.pfill { height: 100%; background: #2a7a2a; border-radius: 2px; transition: width .3s; }
+
+.nums { display: flex; flex-wrap: wrap; gap: 4px; }
+.np {
+  font-size: 13px; padding: 5px 9px; border-radius: 7px;
+  background: #f0f0ea; color: #333; cursor: pointer;
+  border: 1px solid #ddd;
+  user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+.np.match { background: #3b7fd4; color: #fff; font-weight: 600; border-color: #3b7fd4; }
+.np.got { background: #2a7a2a; color: #fff; text-decoration: line-through; border-color: #2a7a2a; opacity: 0.7; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: #aaa; font-size: 15px; grid-column: 1/-1; }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Álbum FIFA World Cup 2026</h1>
+  <div class="search-row">
+    <input type="number" id="numInput" placeholder="Número de lámina (1-20)" min="1" max="20" oninput="render()" inputmode="numeric">
+    <button class="clear-btn" onclick="clearSearch()">✕</button>
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+<div class="vfilters" id="vfilters"></div>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:#f0f0ea;border:1px solid #ccc"></div>Falta</div>
+  <div class="li"><div class="ld" style="background:#2a7a2a"></div>Conseguida (toca para marcar)</div>
+  <div class="li"><div class="ld" style="background:#3b7fd4"></div>Búsqueda</div>
+</div>
+<div class="banner" id="banner"></div>
+<div class="totals" id="totals"></div>
+<div class="infobar">
+  <span id="info"></span>
+  <button class="rbtn" onclick="confirmReset()">↺ Reiniciar todo</button>
+</div>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'laminas_wc2026';
+
+const teams = [
+  {code:'FWC', name:'FIFA World Cup', flag:'🏆', page:null, group:'Especiales', gc:'#c0392b', missing:[2,3,4,5,6,7,11,12,17,18,19]},
+  {code:'MEX', name:'México',         flag:'🇲🇽', page:8,  group:'Grupo A', gc:'#4a7c3f', missing:[1,3,4,7,8,10,11,12,13,16,19]},
+  {code:'RSA', name:'Sudáfrica',      flag:'🇿🇦', page:10, group:'Grupo A', gc:'#4a7c3f', missing:[1,3,7,10,11,13,16,17,18,20]},
+  {code:'KOR', name:'Corea del Sur',  flag:'🇰🇷', page:12, group:'Grupo A', gc:'#4a7c3f', missing:[1,2,5,6,9,10,13,14,15,17,18,19]},
+  {code:'CZE', name:'Rep. Checa',     flag:'🇨🇿', page:14, group:'Grupo A', gc:'#4a7c3f', missing:[3,4,12,13,14,16,17,18,20]},
+  {code:'CAN', name:'Canadá',         flag:'🇨🇦', page:16, group:'Grupo B', gc:'#c0392b', missing:[3,5,6,8,10,11,12,13,16,17,20]},
+  {code:'BIH', name:'Bosnia y Herz.', flag:'🇧🇦', page:18, group:'Grupo B', gc:'#c0392b', missing:[5,8,20]},
+  {code:'QAT', name:'Qatar',          flag:'🇶🇦', page:20, group:'Grupo B', gc:'#c0392b', missing:[1,2,3,5,6,7,9,10,11,12,13,14,16,17,18,19,20]},
+  {code:'SUI', name:'Suiza',          flag:'🇨🇭', page:22, group:'Grupo B', gc:'#c0392b', missing:[1,2,3,4,5,6,7,8,11,13,14]},
+  {code:'BRA', name:'Brasil',         flag:'🇧🇷', page:24, group:'Grupo C', gc:'#b8860b', missing:[1,4,5,7,8,9,11,14,15,17,18,19]},
+  {code:'MAR', name:'Marruecos',      flag:'🇲🇦', page:26, group:'Grupo C', gc:'#b8860b', missing:[1,2,3,4,5,6,7,9,10,12,14,15,16,17,18]},
+  {code:'HAI', name:'Haití',          flag:'🇭🇹', page:28, group:'Grupo C', gc:'#b8860b', missing:[5,7,8,9,10,11,15,17,18,19]},
+  {code:'SCO', name:'Escocia',        flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', page:30, group:'Grupo C', gc:'#b8860b', missing:[1,3,4,5,6,12,14,15,18,19]},
+  {code:'USA', name:'Estados Unidos', flag:'🇺🇸', page:32, group:'Grupo D', gc:'#2980b9', missing:[2,3,4,6,7,10,11,13,14,16]},
+  {code:'PAR', name:'Paraguay',       flag:'🇵🇾', page:34, group:'Grupo D', gc:'#2980b9', missing:[1,2,4,7,9,11,12,14,15,16,18,19,20]},
+  {code:'AUS', name:'Australia',      flag:'🇦🇺', page:36, group:'Grupo D', gc:'#2980b9', missing:[2,3,5,7,8,9,10,11,13,14,16,17,18,20]},
+  {code:'TUR', name:'Turquía',        flag:'🇹🇷', page:38, group:'Grupo D', gc:'#2980b9', missing:[1,3,5,6,7,9,10,11,12,13,14,15,16,17,18]},
+  {code:'GER', name:'Alemania',       flag:'🇩🇪', page:40, group:'Grupo E', gc:'#e67e22', missing:[3,5,14,16,18]},
+  {code:'CUW', name:'Curazao',        flag:'🇨🇼', page:42, group:'Grupo E', gc:'#e67e22', missing:[1,3,4,5,7,9,13,14,18,19]},
+  {code:'CIV', name:'Costa de Marfil',flag:'🇨🇮', page:44, group:'Grupo E', gc:'#e67e22', missing:[4,5,6,8,9,10,11,12,14,18,19,20]},
+  {code:'ECU', name:'Ecuador',        flag:'🇪🇨', page:46, group:'Grupo E', gc:'#e67e22', missing:[1,3,4,5,7,9,10,11,14,15,16,18,19,20]},
+  {code:'NED', name:'Países Bajos',   flag:'🇳🇱', page:48, group:'Grupo F', gc:'#16a085', missing:[1,3,5,6,10,15,17,18,20]},
+  {code:'JPN', name:'Japón',          flag:'🇯🇵', page:50, group:'Grupo F', gc:'#16a085', missing:[1,2,3,5,7,8,9,11,12,14,15,16,17,18,19,20]},
+  {code:'SWE', name:'Suecia',         flag:'🇸🇪', page:52, group:'Grupo F', gc:'#16a085', missing:[1,3,5,11,15,16,17,19,20]},
+  {code:'TUN', name:'Túnez',          flag:'🇹🇳', page:54, group:'Grupo F', gc:'#16a085', missing:[3,7,10,11,14,17,18,19,20]},
+  {code:'BEL', name:'Bélgica',        flag:'🇧🇪', page:58, group:'Grupo G', gc:'#8e44ad', missing:[1,3,4,6,7,8,9,10,11,12,14,15,16,17,18,19,20]},
+  {code:'EGY', name:'Egipto',         flag:'🇪🇬', page:60, group:'Grupo G', gc:'#8e44ad', missing:[1,2,3,5,7,8,9,11,12,14,15,16,17,18,20]},
+  {code:'IRN', name:'Irán',           flag:'🇮🇷', page:62, group:'Grupo G', gc:'#8e44ad', missing:[1,2,6,7,9,10,11,15,16,19,20]},
+  {code:'NZL', name:'Nueva Zelanda',  flag:'🇳🇿', page:64, group:'Grupo G', gc:'#8e44ad', missing:[3,4,5,6,8,9,13,14,15,18,19]},
+  {code:'ESP', name:'España',         flag:'🇪🇸', page:66, group:'Grupo H', gc:'#d35400', missing:[2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,20]},
+  {code:'CPV', name:'Cabo Verde',     flag:'🇨🇻', page:68, group:'Grupo H', gc:'#d35400', missing:[2,3,5,6,7,9,11,12,13,14,15,16,18]},
+  {code:'KSA', name:'Arabia Saudita', flag:'🇸🇦', page:70, group:'Grupo H', gc:'#d35400', missing:[1,2,3,4,6,7,8,10,11,14,15,16,17,18,19,20]},
+  {code:'URU', name:'Uruguay',        flag:'🇺🇾', page:72, group:'Grupo H', gc:'#d35400', missing:[1,3,5,6,7,8,9,12,14,16,17,18]},
+  {code:'FRA', name:'Francia',        flag:'🇫🇷', page:74, group:'Grupo I', gc:'#1a5276', missing:[2,3,5,6,7,9,10,11,14,16,18,19,20]},
+  {code:'SEN', name:'Senegal',        flag:'🇸🇳', page:76, group:'Grupo I', gc:'#1a5276', missing:[2,3,5,7,8,11,12,13,14,15,16,17,18,19,20]},
+  {code:'IRQ', name:'Irak',           flag:'🇮🇶', page:78, group:'Grupo I', gc:'#1a5276', missing:[2,3,5,6,7,9,10,11,14,16,18,20]},
+  {code:'NOR', name:'Noruega',        flag:'🇳🇴', page:80, group:'Grupo I', gc:'#1a5276', missing:[1,2,3,5,6,7,8,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ARG', name:'Argentina',      flag:'🇦🇷', page:82, group:'Grupo J', gc:'#27ae60', missing:[1,2,3,5,6,7,8,10,11,15]},
+  {code:'ALG', name:'Argelia',        flag:'🇩🇿', page:84, group:'Grupo J', gc:'#27ae60', missing:[1,3,7,8,9,10,11,12,13,15,16,17,19,20]},
+  {code:'AUT', name:'Austria',        flag:'🇦🇹', page:86, group:'Grupo J', gc:'#27ae60', missing:[1,2,3,4,5,7,9,13,14,16,18,19,20]},
+  {code:'JOR', name:'Jordania',       flag:'🇯🇴', page:88, group:'Grupo J', gc:'#27ae60', missing:[1,3,4,5,6,7,8,11,14,16,18,19,20]},
+  {code:'POR', name:'Portugal',       flag:'🇵🇹', page:90, group:'Grupo K', gc:'#922b21', missing:[3,4,5,8,11,12,16,18,20]},
+  {code:'COD', name:'Congo RD',       flag:'🇨🇩', page:92, group:'Grupo K', gc:'#922b21', missing:[1,3,5,7,10,11,14,15,16,19,20]},
+  {code:'UZB', name:'Uzbekistán',     flag:'🇺🇿', page:94, group:'Grupo K', gc:'#922b21', missing:[1,6,7,9,10,11,13,14,15,16,19,20]},
+  {code:'COL', name:'Colombia',       flag:'🇨🇴', page:96, group:'Grupo K', gc:'#922b21', missing:[1,3,4,5,7,8,9,10,11,16,17,18]},
+  {code:'ENG', name:'Inglaterra',     flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', page:98,  group:'Grupo L', gc:'#566573', missing:[1,2,3,4,5,6,7,8,9,10,11,14,15,16,20]},
+  {code:'CRO', name:'Croacia',        flag:'🇭🇷', page:100, group:'Grupo L', gc:'#566573', missing:[1,2,3,4,5,7,8,11,15,16,17,18,19,20]},
+  {code:'GHA', name:'Ghana',          flag:'🇬🇭', page:102, group:'Grupo L', gc:'#566573', missing:[3,6,7,9,10,11,14,15,16,18,19]},
+  {code:'PAN', name:'Panamá',         flag:'🇵🇦', page:104, group:'Grupo L', gc:'#566573', missing:[2,3,4,5,6,7,9,10,11,14,16,17,18,19,20]},
+];
+
+const groupList = ['Todos','Especiales','Grupo A','Grupo B','Grupo C','Grupo D','Grupo E','Grupo F','Grupo G','Grupo H','Grupo I','Grupo J','Grupo K','Grupo L'];
+
+let got = {};
+
+function load() {
+  try {
+    const r = localStorage.getItem(KEY);
+    if (r) { const p = JSON.parse(r); got = {}; for (const c in p) got[c] = new Set(p[c]); }
+  } catch(e) { got = {}; }
+}
+
+function save() {
+  const o = {}; for (const c in got) o[c] = [...got[c]];
+  localStorage.setItem(KEY, JSON.stringify(o));
+}
+
+function toggle(code, num) {
+  if (!got[code]) got[code] = new Set();
+  if (got[code].has(num)) { got[code].delete(num); toast(code+' #'+num+' → faltante'); }
+  else { got[code].add(num); toast('✓ '+code+' #'+num+' conseguida!'); }
+  save(); buildTotals(); render();
+}
+
+function confirmReset() {
+  if (confirm('¿Reiniciar todo el progreso?')) { got = {}; save(); buildTotals(); render(); toast('Reiniciado'); }
+}
+
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function remaining(t) {
+  const g = got[t.code] || new Set();
+  return t.missing.filter(n => !g.has(n)).length;
+}
+
+function buildTotals() {
+  const div = document.getElementById('totals');
+  div.innerHTML = '';
+  let gm = 0, gg = 0;
+  groupList.slice(1).forEach(function(gr) {
+    const ts = teams.filter(t => t.group === gr);
+    if (!ts.length) return;
+    const tm = ts.reduce((a,t) => a+t.missing.length, 0);
+    const tg = ts.reduce((a,t) => { const g=got[t.code]; return a+(g?[...g].filter(n=>t.missing.includes(n)).length:0); }, 0);
+    gm += tm; gg += tg;
+    const d = document.createElement('div');
+    d.className = 'tot';
+    d.innerHTML = '<div class="tl">'+gr+'</div><div class="tn">'+(tm-tg)+'</div><div class="ts">+'+tg+' ✓</div>';
+    div.appendChild(d);
+  });
+  const dg = document.createElement('div'); dg.className = 'tot grand';
+  dg.innerHTML = '<div class="tl">Faltan</div><div class="tn">'+(gm-gg)+'</div><div class="ts">de '+gm+'</div>';
+  div.appendChild(dg);
+  const dgg = document.createElement('div'); dgg.className = 'tot tgot';
+  dgg.innerHTML = '<div class="tl">Conseguidas</div><div class="tn">'+gg+'</div><div class="ts">✓</div>';
+  div.appendChild(dgg);
+}
+
+let activeGroup = 'Todos';
+let activeView = 'all';
+
+// Build group filters
+const fd = document.getElementById('filters');
+groupList.forEach(function(gr) {
+  const b = document.createElement('button');
+  b.className = 'fbtn' + (gr==='Todos'?' active':'');
+  b.textContent = gr;
+  b.onclick = function() {
+    activeGroup = gr;
+    document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  };
+  fd.appendChild(b);
+});
+
+// Build view filters
+const vd = document.getElementById('vfilters');
+[['all','Todos'],['pending','Con faltantes'],['complete','Completos']].forEach(function(p) {
+  const b = document.createElement('button');
+  b.className = 'vbtn'+(p[0]==='all'?' active':'');
+  b.textContent = p[1];
+  b.onclick = function() {
+    activeView = p[0];
+    document.querySelectorAll('.vbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  };
+  vd.appendChild(b);
+});
+
+function clearSearch() { document.getElementById('numInput').value=''; render(); }
+
+function render() {
+  const q = (document.getElementById('numInput').value||'').trim();
+  const num = parseInt(q);
+  const hasNum = q!==''&&!isNaN(num)&&num>=1&&num<=20;
+
+  let data = activeGroup==='Todos' ? teams.slice() : teams.filter(t=>t.group===activeGroup);
+  if (hasNum) data = data.filter(t => { const g=got[t.code]||new Set(); return t.missing.includes(num)&&!g.has(num); });
+  if (activeView==='pending') data = data.filter(t=>remaining(t)>0);
+  if (activeView==='complete') data = data.filter(t=>remaining(t)===0);
+
+  const bn = document.getElementById('banner');
+  if (hasNum) { bn.style.display='block'; bn.textContent=data.length+' equipo'+(data.length!==1?'s':'')+' aún necesita'+(data.length===1?'':'n')+' la lámina '+num; }
+  else bn.style.display='none';
+
+  document.getElementById('info').textContent = 'Mostrando '+data.length+' equipo'+(data.length!==1?'s':'');
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if (!data.length) { grid.innerHTML='<div class="empty">No hay resultados</div>'; return; }
+
+  data.forEach(function(t) {
+    const g = got[t.code]||new Set();
+    const gc = [...g].filter(n=>t.missing.includes(n)).length;
+    const rem = t.missing.length - gc;
+    const pct = t.missing.length>0 ? Math.round((gc/t.missing.length)*100) : 0;
+
+    const d = document.createElement('div');
+    d.className = 'card'+(hasNum?' hl':'')+(rem===0?' done':'');
+
+    const pills = t.missing.map(function(n) {
+      const isGot = g.has(n);
+      const isMatch = hasNum&&n===num&&!isGot;
+      let cls='np'+(isMatch?' match':'')+(isGot?' got':'');
+      return '<span class="'+cls+'" onclick="toggle(\''+t.code+'\','+n+')">'+n+'</span>';
+    }).join('');
+
+    d.innerHTML =
+      '<div class="ctop">'+
+        '<span class="fl">'+t.flag+'</span>'+
+        '<div class="cm">'+
+          '<div class="ccode">'+t.code+'</div>'+
+          '<div class="cname">'+t.name+'</div>'+
+          '<div class="cbadges">'+
+            '<span class="gbadge" style="background:'+t.gc+'">'+t.group+'</span>'+
+            (t.page ? '<span class="pbadge">Pág. '+t.page+'</span>' : '')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="crow"><span class="cbig">'+rem+'</span>'+(gc>0?'<span class="cgot">+'+gc+' ✓</span>':'')+'</div>'+
+      '<div class="pbar"><div class="pfill" style="width:'+pct+'%"></div></div>'+
+      '<div class="nums">'+pills+'</div>';
+
+    grid.appendChild(d);
+  });
+}
+
+load();
+buildTotals();
+render();
+</script>
+</body>
+</html>
