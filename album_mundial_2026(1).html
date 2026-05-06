@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum FIFA World Cup 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+
+/* LOGIN */
+#loginScreen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 24px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+#loginScreen h1 { font-size: 26px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 6px; }
+#loginScreen p { font-size: 14px; color: #aaa; text-align: center; margin-bottom: 32px; }
+.login-box { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 340px; }
+.login-box h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.login-box input { width: 100%; font-size: 16px; padding: 11px 14px; border: 1px solid #d0d0c8; border-radius: 10px; outline: none; margin-bottom: 12px; background: #f9f9f6; }
+.login-box input:focus { border-color: #3b7fd4; background: #fff; }
+.login-btn { width: 100%; padding: 12px; background: #1a1a1a; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 16px; }
+.login-btn:disabled { opacity: 0.4; }
+.users-list h3 { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.user-chip { display: inline-flex; align-items: center; gap: 6px; background: #f0f0ea; border: 1px solid #ddd; border-radius: 20px; padding: 5px 12px; margin: 3px; cursor: pointer; font-size: 13px; }
+.user-chip .del { color: #c0392b; font-size: 12px; margin-left: 2px; font-weight: 700; }
+
+/* APP */
+#appScreen { display: none; }
+header { background: #fff; border-bottom: 1px solid #e0e0d8; padding: 12px 16px; position: sticky; top: 0; z-index: 10; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.header-top h1 { font-size: 15px; font-weight: 700; }
+.user-bar { display: flex; align-items: center; gap: 8px; }
+.user-name { font-size: 13px; font-weight: 600; color: #3b7fd4; }
+.switch-btn { font-size: 11px; color: #888; background: #f0f0ea; border: 1px solid #ddd; border-radius: 10px; padding: 3px 8px; cursor: pointer; }
+.search-row { display: flex; gap: 8px; }
+.search-row input { flex: 1; font-size: 16px; padding: 9px 12px; border: 1px solid #d0d0c8; border-radius: 10px; background: #f9f9f6; outline: none; }
+.search-row input:focus { border-color: #888; background: #fff; }
+.clear-btn { padding: 9px 14px; border: 1px solid #d0d0c8; border-radius: 10px; background: #f0f0ea; font-size: 14px; cursor: pointer; color: #555; }
+
+.filters { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 0; scrollbar-width: none; }
+.filters::-webkit-scrollbar { display: none; }
+.fbtn { flex-shrink: 0; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid #ccc; background: #fff; color: #555; cursor: pointer; }
+.fbtn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+.vfilters { display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px 0; scrollbar-width: none; }
+.vfilters::-webkit-scrollbar { display: none; }
+.vbtn { flex-shrink: 0; font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 1px solid #ccc; background: #fff; color: #555; cursor: pointer; }
+.vbtn.active { background: #2a7a2a; color: #fff; border-color: #2a7a2a; }
+
+.banner { background: #3b7fd4; color: #fff; text-align: center; padding: 8px; font-size: 14px; font-weight: 500; display: none; }
+
+/* TOTALS */
+.totals-section { padding: 10px 16px 0; }
+.totals-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.totals { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.totals::-webkit-scrollbar { display: none; }
+.tot { flex-shrink: 0; background: #fff; border: 1px solid #e0e0d8; border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 70px; }
+.tot .tl { font-size: 10px; color: #888; margin-bottom: 2px; }
+.tot .tn { font-size: 18px; font-weight: 700; }
+.tot .ts { font-size: 10px; color: #aaa; margin-top: 1px; }
+.tot.grand { background: #1a1a1a; color: #fff; }
+.tot.grand .tl { color: #aaa; }
+.tot.grand .ts { color: #666; }
+.tot.tgot { background: #2a7a2a; color: #fff; }
+.tot.tgot .tl { color: #9fdf9f; }
+
+/* EXTRAS COUNTER */
+.extras-bar {
+  margin: 0 16px 10px; background: #fff3cd; border: 1px solid #ffc107;
+  border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.extras-bar .ex-title { font-size: 13px; font-weight: 700; color: #856404; }
+.extras-bar .ex-sub { font-size: 11px; color: #a07800; margin-top: 1px; }
+.extras-bar .ex-count { font-size: 28px; font-weight: 800; color: #856404; }
+.extras-bar .ex-right { text-align: right; }
+
+.infobar { font-size: 12px; color: #888; padding: 4px 16px; display: flex; justify-content: space-between; align-items: center; }
+.rbtn { font-size: 11px; color: #c0392b; background: none; border: none; cursor: pointer; }
+
+.legend { display: flex; gap: 12px; padding: 4px 16px 2px; flex-wrap: wrap; }
+.li { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #888; }
+.ld { width: 12px; height: 12px; border-radius: 3px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; padding: 8px 16px 32px; }
+
+.card { background: #fff; border: 1px solid #e0e0d8; border-radius: 12px; padding: 12px; }
+.card.hl { border-color: #3b7fd4; background: #edf4fd; }
+.card.done { border-color: #2a7a2a; background: #f0fbf0; opacity: 0.75; }
+.card.extra-card { border-color: #ffc107; background: #fffdf0; }
+
+.ctop { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.fl { font-size: 22px; line-height: 1; }
+.cm { flex: 1; min-width: 0; }
+.ccode { font-size: 14px; font-weight: 700; }
+.cname { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cbadges { display: flex; gap: 3px; margin-top: 3px; flex-wrap: wrap; }
+.gbadge { font-size: 10px; padding: 1px 6px; border-radius: 6px; color: #fff; font-weight: 600; }
+.pbadge { font-size: 10px; padding: 1px 6px; border-radius: 6px; background: #e8e8e0; color: #666; }
+.extrabadge { font-size: 10px; padding: 1px 6px; border-radius: 6px; background: #ffc107; color: #5a3e00; font-weight: 700; }
+
+.crow { display: flex; align-items: baseline; gap: 6px; margin-bottom: 5px; }
+.cbig { font-size: 26px; font-weight: 700; }
+.cgot { font-size: 13px; color: #2a7a2a; font-weight: 500; }
+.pbar { height: 4px; background: #e0e0d8; border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+.pfill { height: 100%; background: #2a7a2a; border-radius: 2px; transition: width .3s; }
+.pfill.extra { background: #ffc107; }
+
+.nums { display: flex; flex-wrap: wrap; gap: 4px; }
+.np { font-size: 12px; padding: 5px 7px; border-radius: 7px; background: #f0f0ea; color: #333; cursor: pointer; border: 1px solid #ddd; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.np.match { background: #3b7fd4; color: #fff; font-weight: 600; border-color: #3b7fd4; }
+.np.got { background: #2a7a2a; color: #fff; text-decoration: line-through; border-color: #2a7a2a; opacity: 0.8; }
+.np.got.extra-pill { background: #e6a800; border-color: #e6a800; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: #aaa; font-size: 15px; grid-column: 1/-1; }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <h1>⚽ Álbum FIFA<br>World Cup 2026</h1>
+  <p>Tu colección personal de láminas</p>
+  <div class="login-box">
+    <h2>¿Quién eres?</h2>
+    <input type="text" id="nameInput" placeholder="Escribe tu nombre..." maxlength="30">
+    <button class="login-btn" id="loginBtn" onclick="loginUser()" disabled>Entrar →</button>
+    <div class="users-list" id="usersList"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <header>
+    <div class="header-top">
+      <h1>⚽ Álbum FIFA World Cup 2026</h1>
+      <div class="user-bar">
+        <span class="user-name" id="userLabel"></span>
+        <button class="switch-btn" onclick="switchUser()">Cambiar</button>
+      </div>
+    </div>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Buscar lámina o equipo..." oninput="render()">
+      <button class="clear-btn" onclick="clearSearch()">✕</button>
+    </div>
+  </header>
+
+  <div class="filters" id="filters"></div>
+  <div class="vfilters" id="vfilters"></div>
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#f0f0ea;border:1px solid #ccc"></div>Falta</div>
+    <div class="li"><div class="ld" style="background:#2a7a2a"></div>Conseguida</div>
+    <div class="li"><div class="ld" style="background:#3b7fd4"></div>Búsqueda</div>
+  </div>
+  <div class="banner" id="banner"></div>
+
+  <!-- MAIN TOTALS -->
+  <div class="totals-section">
+    <div class="totals-label">📋 Láminas del álbum</div>
+    <div class="totals" id="totals"></div>
+  </div>
+
+  <!-- EXTRAS (CC) -->
+  <div class="extras-bar" id="extrasBar">
+    <div>
+      <div class="ex-title">🥤 Extras Coca-Cola</div>
+
+    </div>
+    <div class="ex-right">
+      <div class="ex-count" id="extrasCount">0/14</div>
+    </div>
+  </div>
+
+  <div class="infobar">
+    <span id="info"></span>
+    <button class="rbtn" onclick="confirmReset()">↺ Reiniciar mi progreso</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const USERS_KEY = 'wc2026_users';
+const DATA_PREFIX = 'wc2026_u_';
+
+// isExtra: true = not counted in main album totals
+const teams = [
+  {code:'FWC', name:'FIFA World Cup',  flag:'🏆', page:null, group:'Especiales', gc:'#c0392b', isExtra:false,
+   missing:['FWC00','FWC01','FWC02','FWC03','FWC04','FWC05','FWC06','FWC07','FWC08','FWC09','FWC10','FWC11','FWC12','FWC13','FWC14','FWC15','FWC16','FWC17','FWC18','FWC19']},
+  {code:'CC',  name:'Coca-Cola',       flag:'🥤', page:null, group:'Especiales', gc:'#e63946', isExtra:true,
+   missing:['CC1','CC2','CC3','CC4','CC5','CC6','CC7','CC8','CC9','CC10','CC11','CC12','CC13','CC14']},
+  {code:'MEX', name:'México',          flag:'🇲🇽', page:8,   group:'Grupo A', gc:'#4a7c3f', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'RSA', name:'Sudáfrica',       flag:'🇿🇦', page:10,  group:'Grupo A', gc:'#4a7c3f', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'KOR', name:'Corea del Sur',   flag:'🇰🇷', page:12,  group:'Grupo A', gc:'#4a7c3f', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CZE', name:'Rep. Checa',      flag:'🇨🇿', page:14,  group:'Grupo A', gc:'#4a7c3f', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CAN', name:'Canadá',          flag:'🇨🇦', page:16,  group:'Grupo B', gc:'#c0392b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'BIH', name:'Bosnia y Herz.',  flag:'🇧🇦', page:18,  group:'Grupo B', gc:'#c0392b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'QAT', name:'Qatar',           flag:'🇶🇦', page:20,  group:'Grupo B', gc:'#c0392b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'SUI', name:'Suiza',           flag:'🇨🇭', page:22,  group:'Grupo B', gc:'#c0392b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'BRA', name:'Brasil',          flag:'🇧🇷', page:24,  group:'Grupo C', gc:'#b8860b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'MAR', name:'Marruecos',       flag:'🇲🇦', page:26,  group:'Grupo C', gc:'#b8860b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'HAI', name:'Haití',           flag:'🇭🇹', page:28,  group:'Grupo C', gc:'#b8860b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'SCO', name:'Escocia',         flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', page:30,  group:'Grupo C', gc:'#b8860b', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'USA', name:'Estados Unidos',  flag:'🇺🇸', page:32,  group:'Grupo D', gc:'#2980b9', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'PAR', name:'Paraguay',        flag:'🇵🇾', page:34,  group:'Grupo D', gc:'#2980b9', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'AUS', name:'Australia',       flag:'🇦🇺', page:36,  group:'Grupo D', gc:'#2980b9', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'TUR', name:'Turquía',         flag:'🇹🇷', page:38,  group:'Grupo D', gc:'#2980b9', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'GER', name:'Alemania',        flag:'🇩🇪', page:40,  group:'Grupo E', gc:'#e67e22', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CUW', name:'Curazao',         flag:'🇨🇼', page:42,  group:'Grupo E', gc:'#e67e22', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CIV', name:'Costa de Marfil', flag:'🇨🇮', page:44,  group:'Grupo E', gc:'#e67e22', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ECU', name:'Ecuador',         flag:'🇪🇨', page:46,  group:'Grupo E', gc:'#e67e22', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'NED', name:'Países Bajos',    flag:'🇳🇱', page:48,  group:'Grupo F', gc:'#16a085', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'JPN', name:'Japón',           flag:'🇯🇵', page:50,  group:'Grupo F', gc:'#16a085', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'SWE', name:'Suecia',          flag:'🇸🇪', page:52,  group:'Grupo F', gc:'#16a085', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'TUN', name:'Túnez',           flag:'🇹🇳', page:54,  group:'Grupo F', gc:'#16a085', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'BEL', name:'Bélgica',         flag:'🇧🇪', page:58,  group:'Grupo G', gc:'#8e44ad', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'EGY', name:'Egipto',          flag:'🇪🇬', page:60,  group:'Grupo G', gc:'#8e44ad', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'IRN', name:'Irán',            flag:'🇮🇷', page:62,  group:'Grupo G', gc:'#8e44ad', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'NZL', name:'Nueva Zelanda',   flag:'🇳🇿', page:64,  group:'Grupo G', gc:'#8e44ad', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ESP', name:'España',          flag:'🇪🇸', page:66,  group:'Grupo H', gc:'#d35400', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CPV', name:'Cabo Verde',      flag:'🇨🇻', page:68,  group:'Grupo H', gc:'#d35400', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'KSA', name:'Arabia Saudita',  flag:'🇸🇦', page:70,  group:'Grupo H', gc:'#d35400', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'URU', name:'Uruguay',         flag:'🇺🇾', page:72,  group:'Grupo H', gc:'#d35400', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'FRA', name:'Francia',         flag:'🇫🇷', page:74,  group:'Grupo I', gc:'#1a5276', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'SEN', name:'Senegal',         flag:'🇸🇳', page:76,  group:'Grupo I', gc:'#1a5276', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'IRQ', name:'Irak',            flag:'🇮🇶', page:78,  group:'Grupo I', gc:'#1a5276', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'NOR', name:'Noruega',         flag:'🇳🇴', page:80,  group:'Grupo I', gc:'#1a5276', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ARG', name:'Argentina',       flag:'🇦🇷', page:82,  group:'Grupo J', gc:'#27ae60', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ALG', name:'Argelia',         flag:'🇩🇿', page:84,  group:'Grupo J', gc:'#27ae60', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'AUT', name:'Austria',         flag:'🇦🇹', page:86,  group:'Grupo J', gc:'#27ae60', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'JOR', name:'Jordania',        flag:'🇯🇴', page:88,  group:'Grupo J', gc:'#27ae60', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'POR', name:'Portugal',        flag:'🇵🇹', page:90,  group:'Grupo K', gc:'#922b21', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'COD', name:'Congo RD',        flag:'🇨🇩', page:92,  group:'Grupo K', gc:'#922b21', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'UZB', name:'Uzbekistán',      flag:'🇺🇿', page:94,  group:'Grupo K', gc:'#922b21', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'COL', name:'Colombia',        flag:'🇨🇴', page:96,  group:'Grupo K', gc:'#922b21', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'ENG', name:'Inglaterra',      flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', page:98,  group:'Grupo L', gc:'#566573', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'CRO', name:'Croacia',         flag:'🇭🇷', page:100, group:'Grupo L', gc:'#566573', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'GHA', name:'Ghana',           flag:'🇬🇭', page:102, group:'Grupo L', gc:'#566573', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+  {code:'PAN', name:'Panamá',          flag:'🇵🇦', page:104, group:'Grupo L', gc:'#566573', isExtra:false, missing:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
+];
+
+const groupList = ['Todos','Especiales','Grupo A','Grupo B','Grupo C','Grupo D','Grupo E','Grupo F','Grupo G','Grupo H','Grupo I','Grupo J','Grupo K','Grupo L'];
+
+let currentUser = null;
+let got = {}; // got[code] = Set of sticker keys (stored as strings)
+
+function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY))||[]; } catch(e){ return []; } }
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+function updateLoginBtn() {
+  const v = document.getElementById('nameInput').value.trim();
+  document.getElementById('loginBtn').disabled = v.length < 2;
+}
+
+function renderUsersList() {
+  const users = getUsers();
+  const div = document.getElementById('usersList');
+  if (!users.length) { div.innerHTML=''; return; }
+  div.innerHTML = '<h3>Usuarios anteriores</h3>';
+  users.forEach(function(u) {
+    const chip = document.createElement('span');
+    chip.className = 'user-chip';
+    chip.innerHTML = '👤 '+u+' <span class="del">✕</span>';
+    chip.querySelector('.del').onclick = function(e) { e.stopPropagation(); deleteUser(u); };
+    chip.onclick = function() { enterUser(u); };
+    div.appendChild(chip);
+  });
+}
+
+function loginUser() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (name.length < 2) return;
+  enterUser(name);
+}
+
+function enterUser(name) {
+  currentUser = name;
+  const users = getUsers();
+  if (!users.includes(name)) { users.unshift(name); saveUsers(users); }
+  loadProgress();
+  document.getElementById('userLabel').textContent = '👤 '+name;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  buildTotals(); render();
+}
+
+function deleteUser(name) {
+  if (!confirm('¿Eliminar usuario "'+name+'" y su progreso?')) return;
+  saveUsers(getUsers().filter(function(u){ return u!==name; }));
+  localStorage.removeItem(DATA_PREFIX+name);
+  renderUsersList();
+  toast('Usuario "'+name+'" eliminado');
+}
+
+function switchUser() {
+  currentUser=null; got={};
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('nameInput').value='';
+  document.getElementById('loginBtn').disabled=true;
+  renderUsersList();
+}
+
+// Progress - store ALL sticker keys as strings
+function loadProgress() {
+  try {
+    const r = localStorage.getItem(DATA_PREFIX+currentUser);
+    if (r) {
+      const p = JSON.parse(r);
+      got = {};
+      for (var c in p) got[c] = new Set(p[c].map(String));
+    } else got = {};
+  } catch(e) { got={}; }
+}
+
+function saveProgress() {
+  var o={};
+  for (var c in got) o[c]=[...got[c]];
+  localStorage.setItem(DATA_PREFIX+currentUser, JSON.stringify(o));
+}
+
+function toggle(code, stickerKey) {
+  var key = String(stickerKey);
+  if (!got[code]) got[code] = new Set();
+  if (got[code].has(key)) { got[code].delete(key); toast(code+' '+key+' → faltante'); }
+  else { got[code].add(key); toast('✓ '+code+' '+key+' conseguida!'); }
+  saveProgress(); buildTotals(); render();
+}
+
+function confirmReset() {
+  if (confirm('¿Reiniciar todo el progreso de '+currentUser+'?')) {
+    got={}; saveProgress(); buildTotals(); render(); toast('Progreso reiniciado');
+  }
+}
+
+let toastT;
+function toast(msg) {
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('show'); },2200);
+}
+
+function getGotCount(t) {
+  var g=got[t.code]||new Set();
+  return t.missing.filter(function(n){ return g.has(String(n)); }).length;
+}
+
+function remaining(t) { return t.missing.length - getGotCount(t); }
+
+function buildTotals() {
+  // Main album totals (exclude extras)
+  var div=document.getElementById('totals'); div.innerHTML='';
+  var gm=0, gg=0;
+  groupList.slice(1).forEach(function(gr) {
+    var ts=teams.filter(function(t){ return t.group===gr && !t.isExtra; });
+    if (!ts.length) return;
+    var tm=ts.reduce(function(a,t){ return a+t.missing.length; },0);
+    var tg=ts.reduce(function(a,t){ return a+getGotCount(t); },0);
+    gm+=tm; gg+=tg;
+    var d=document.createElement('div'); d.className='tot';
+    d.innerHTML='<div class="tl">'+gr+'</div><div class="tn">'+(tm-tg)+'</div><div class="ts">+'+tg+' ✓</div>';
+    div.appendChild(d);
+  });
+  var dg=document.createElement('div'); dg.className='tot grand';
+  dg.innerHTML='<div class="tl">Faltan</div><div class="tn">'+(gm-gg)+'</div><div class="ts">de '+gm+'</div>';
+  div.appendChild(dg);
+  var dgg=document.createElement('div'); dgg.className='tot tgot';
+  dgg.innerHTML='<div class="tl">Conseguidas</div><div class="tn">'+gg+'</div><div class="ts">✓</div>';
+  div.appendChild(dgg);
+
+  // Extras (CC only)
+  var ccTeam=teams.find(function(t){ return t.code==='CC'; });
+  var ccGot=ccTeam?getGotCount(ccTeam):0;
+  var ccTotal=ccTeam?ccTeam.missing.length:0;
+  document.getElementById('extrasCount').textContent=ccGot+'/'+ccTotal;
+}
+
+let activeGroup='Todos', activeView='all';
+
+var fd=document.getElementById('filters');
+groupList.forEach(function(gr) {
+  var b=document.createElement('button'); b.className='fbtn'+(gr==='Todos'?' active':'');
+  b.textContent=gr;
+  b.onclick=function(){ activeGroup=gr; document.querySelectorAll('.fbtn').forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); render(); };
+  fd.appendChild(b);
+});
+
+var vd=document.getElementById('vfilters');
+[['all','Todos'],['pending','Con faltantes'],['complete','Completos']].forEach(function(p) {
+  var b=document.createElement('button'); b.className='vbtn'+(p[0]==='all'?' active':'');
+  b.textContent=p[1];
+  b.onclick=function(){ activeView=p[0]; document.querySelectorAll('.vbtn').forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); render(); };
+  vd.appendChild(b);
+});
+
+function clearSearch(){ document.getElementById('searchInput').value=''; render(); }
+
+function render() {
+  var q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  var data=activeGroup==='Todos'?teams.slice():teams.filter(function(t){ return t.group===activeGroup; });
+
+  if (q!=='') {
+    data=data.filter(function(t) {
+      var g=got[t.code]||new Set();
+      var matchSticker=t.missing.some(function(n){ return String(n).toLowerCase()===q && !g.has(String(n)); });
+      var matchCode=t.code.toLowerCase().includes(q);
+      var matchName=t.name.toLowerCase().includes(q);
+      return matchSticker||matchCode||matchName;
+    });
+  }
+  if (activeView==='pending') data=data.filter(function(t){ return remaining(t)>0; });
+  if (activeView==='complete') data=data.filter(function(t){ return remaining(t)===0; });
+
+  var bn=document.getElementById('banner');
+  if (q!=='') { bn.style.display='block'; bn.textContent=data.length+' resultado'+(data.length!==1?'s':'')+' para "'+q+'"'; }
+  else bn.style.display='none';
+
+  document.getElementById('info').textContent='Mostrando '+data.length+' equipo'+(data.length!==1?'s':'');
+
+  var grid=document.getElementById('grid'); grid.innerHTML='';
+  if (!data.length) { grid.innerHTML='<div class="empty">No hay resultados</div>'; return; }
+
+  data.forEach(function(t) {
+    var g=got[t.code]||new Set();
+    var gc=getGotCount(t);
+    var rem=t.missing.length-gc;
+    var pct=t.missing.length>0?Math.round((gc/t.missing.length)*100):0;
+    var isExtra=t.isExtra;
+
+    var d=document.createElement('div');
+    d.className='card'+(q!==''?' hl':'')+(rem===0?' done':'')+(isExtra?' extra-card':'');
+
+    var pills=t.missing.map(function(n) {
+      var key=String(n);
+      var isGot=g.has(key);
+      var isMatch=q!==''&&key.toLowerCase()===q&&!isGot;
+      var cls='np'+(isMatch?' match':'')+(isGot?' got'+(isExtra?' extra-pill':''):'');
+      return '<span class="'+cls+'" onclick="toggle(\''+t.code+'\',\''+key+'\')">'+n+'</span>';
+    }).join('');
+
+    var badgesHtml='<span class="gbadge" style="background:'+t.gc+'">'+t.group+'</span>';
+    if (isExtra) badgesHtml+='<span class="extrabadge">EXTRA</span>';
+    if (t.page) badgesHtml+='<span class="pbadge">Pág. '+t.page+'</span>';
+
+    d.innerHTML=
+      '<div class="ctop"><span class="fl">'+t.flag+'</span>'+
+      '<div class="cm"><div class="ccode">'+t.code+'</div><div class="cname">'+t.name+'</div>'+
+      '<div class="cbadges">'+badgesHtml+'</div></div></div>'+
+      '<div class="crow"><span class="cbig">'+rem+'</span>'+(gc>0?'<span class="cgot">+'+gc+' ✓</span>':'')+
+      '</div><div class="pbar"><div class="pfill'+(isExtra?' extra':'')+'" style="width:'+pct+'%"></div></div>'+
+      '<div class="nums">'+pills+'</div>';
+    grid.appendChild(d);
+  });
+}
+
+// Init
+renderUsersList();
+document.getElementById('nameInput').addEventListener('input', updateLoginBtn);
+document.getElementById('nameInput').addEventListener('keydown', function(e){ if(e.key==='Enter') loginUser(); });
+</script>
+</body>
+</html>
